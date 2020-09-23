@@ -44,8 +44,6 @@ import org.openconnectivity.otgc.utils.viewmodel.CommonError;
 import org.openconnectivity.otgc.utils.viewmodel.Response;
 import org.openconnectivity.otgc.utils.viewmodel.ViewModelError;
 import org.openconnectivity.otgc.domain.usecase.GetDeviceIdUseCase;
-import org.openconnectivity.otgc.domain.usecase.SetDisplayPinListenerUseCase;
-import org.openconnectivity.otgc.domain.usecase.SetRandomPinListenerUseCase;
 import org.openconnectivity.otgc.utils.rx.SchedulersFacade;
 import org.openconnectivity.otgc.utils.viewmodel.ViewModelErrorType;
 
@@ -59,8 +57,6 @@ public class DeviceListViewModel extends ViewModel {
     private final GetModeUseCase mGetModeUseCase;
     private final CloseIotivityUseCase closeIotivityUseCase;
     private final LogoutUseCase logoutUseCase;
-    private final SetRandomPinListenerUseCase setRandomPinListenerUseCase;
-    private final SetDisplayPinListenerUseCase setDisplayPinListenerUseCase;
     private final SetClientModeUseCase setClientModeUseCase;
     private final ResetClientModeUseCase resetClientModeUseCase;
     private final SetObtModeUseCase setObtModeUseCase;
@@ -88,8 +84,6 @@ public class DeviceListViewModel extends ViewModel {
             GetModeUseCase getModeUseCase,
             CloseIotivityUseCase closeIotivityUseCase,
             LogoutUseCase logoutUseCase,
-            SetRandomPinListenerUseCase setRandomPinListenerUseCase,
-            SetDisplayPinListenerUseCase setDisplayPinListenerUseCase,
             SetClientModeUseCase setClientModeUseCase,
             ResetClientModeUseCase resetClientModeUseCase,
             SetObtModeUseCase setObtModeUseCase,
@@ -101,8 +95,6 @@ public class DeviceListViewModel extends ViewModel {
         this.mGetModeUseCase = getModeUseCase;
         this.closeIotivityUseCase = closeIotivityUseCase;
         this.logoutUseCase = logoutUseCase;
-        this.setRandomPinListenerUseCase = setRandomPinListenerUseCase;
-        this.setDisplayPinListenerUseCase = setDisplayPinListenerUseCase;
         this.setClientModeUseCase = setClientModeUseCase;
         this.resetClientModeUseCase = resetClientModeUseCase;
         this.setObtModeUseCase = setObtModeUseCase;
@@ -178,20 +170,11 @@ public class DeviceListViewModel extends ViewModel {
 
     public void logout() {
         disposables.add(logoutUseCase.execute()
-                .subscribeOn(schedulersFacade.io())
                 .observeOn(schedulersFacade.ui())
                 .subscribe(
-                        () -> logoutResponse.setValue(Response.success(null)),
+                        (success) -> logoutResponse.setValue(Response.success(null)),
                         throwable -> logoutResponse.setValue(Response.error(throwable))
                 ));
-    }
-
-    public void setRandomPinListener(OCSetRandomPinHandler randomPinCallbackListener) {
-        setRandomPinListenerUseCase.execute(randomPinCallbackListener);
-    }
-
-    public void setDisplayPinListener(OCRandomPinHandler displayPinListener) {
-        setDisplayPinListenerUseCase.execute(displayPinListener);
     }
 
     public void setClientMode() {

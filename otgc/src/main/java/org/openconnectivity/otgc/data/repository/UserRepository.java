@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Completable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 @Singleton
@@ -43,11 +44,11 @@ public class UserRepository {
         return userDao.select();
     }
 
-    public Completable putOrPostUser(String userName, String password) {
-        return Completable.fromAction(() -> userDao.insert(new UserEntity(userName, password)));
+    public Completable putOrPostUser(String userId, String firstName, String lastName, String idToken, String accessToken, String refreshToken) {
+        return Completable.fromAction(() -> userDao.insert(new UserEntity(userId, firstName, lastName, idToken, accessToken, refreshToken)));
     }
 
-    public Completable deleteUser() {
+    public Completable deleteAll() {
         return Completable.fromAction(userDao::deleteAll);
     }
 }

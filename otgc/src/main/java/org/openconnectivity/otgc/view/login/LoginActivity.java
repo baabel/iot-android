@@ -21,47 +21,52 @@
  */
 package org.openconnectivity.otgc.view.login;
 
+
+import android.app.Dialog;
+import android.content.Intent;
+import android.widget.Toast;
+
+
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
-import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.app.AppCompatActivity;
-import android.text.Editable;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 
 import org.openconnectivity.otgc.R;
-import org.openconnectivity.otgc.utils.viewmodel.ViewModelError;
 import org.openconnectivity.otgc.view.devicelist.DeviceListActivity;
 import org.openconnectivity.otgc.utils.di.Injectable;
 import org.openconnectivity.otgc.viewmodel.LoginViewModel;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.OnTextChanged;
+
+import com.auth0.android.Auth0;
+import com.auth0.android.Auth0Exception;
+import com.auth0.android.authentication.AuthenticationException;
+import com.auth0.android.provider.AuthCallback;
+import com.auth0.android.provider.VoidCallback;
+import com.auth0.android.provider.WebAuthProvider;
+import com.auth0.android.result.Credentials;
 
 public class LoginActivity extends AppCompatActivity implements Injectable {
     static final ButterKnife.Setter<View, Boolean> ENABLED =
             (view, value, index) -> view.setEnabled(value);
 
+    private Auth0 auth0;
+
+    public static final String EXTRA_CLEAR_CREDENTIALS = "com.auth0.CLEAR_CREDENTIALS";
+    public static final String EXTRA_ACCESS_TOKEN = "com.auth0.ACCESS_TOKEN";
+    public static final String EXTRA_ID_TOKEN = "com.auth0.ID_TOKEN";
+
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
 
-    @BindView(R.id.edit_text_username) TextInputEditText etUserName;
-    @BindView(R.id.edit_text_password) TextInputEditText etPassword;
-    @BindView(R.id.button_login) Button btnActivate;
-
     private LoginViewModel mViewModel;
-
-    private boolean isValidUsername = false;
-    private boolean isValidPassword = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,46 +74,95 @@ public class LoginActivity extends AppCompatActivity implements Injectable {
 
         // Hide title bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        setContentView(R.layout.activity_login);
-
         ButterKnife.bind(this);
         initViews();
         initViewModel();
-    }
+        setContentView(R.layout.activity_login);
+        Button loginButton = findViewById(R.id.loginButton);
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               login();
+            }
+        });
+        auth0 = new Auth0(this);
+        auth0.setOIDCConformant(true);
 
-    @OnTextChanged(value = R.id.edit_text_username,
-            callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
-    void afterUsernameInput(Editable editable) {
-        isValidUsername = validateUsername(editable.toString());
-        checkIfLoginEnabled();
-    }
-
-    @OnTextChanged(value = R.id.edit_text_password,
-            callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
-    void afterPasswordInput(Editable editable) {
-        isValidPassword = validatePassword(editable.toString());
-        checkIfLoginEnabled();
-    }
-
-    @OnClick(R.id.button_login)
-    public void onLoginPressed(View v) {
-        signIn();
+        //Check if the activity was launched to log the user out
+   //     if (getIntent().getBooleanExtra(EXTRA_CLEAR_CREDENTIALS, false)) {
+           logout();
+  //      }
     }
 
     private void initViews() {
-        checkIfLoginEnabled();
+
     }
 
-    private void checkIfLoginEnabled() {
-        ButterKnife.apply(btnActivate, ENABLED, isValidUsername && isValidPassword);
+    private void login() {
+        WebAuthProvider.login(auth0)
+                .withScheme("demo")
+                .withAudience(String.format("https://%s/userinfo", getString(R.string.com_auth0_domain)))
+                .withScope("openid offline_access")
+                .start(this, new AuthCallback() {
+                    @Override
+                    public void onFailure(@NonNull final Dialog dialog) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(final AuthenticationException exception) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(LoginActivity.this, "Error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull final Credentials credentials) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mViewModel.authenticate(credentials);
+                            }
+                        });
+                    }
+                });
     }
+
+    private void logout() {
+        WebAuthProvider.logout(auth0)
+                .withScheme("demo")
+                .start(this, new VoidCallback() {
+                    @Override
+                    public void onSuccess(Void payload) {
+
+                    }
+
+                    @Override
+                    public void onFailure(Auth0Exception error) {
+                        //Log out canceled, keep the user logged in
+                        showNextActivity();
+                    }
+                });
+    }
+
+    private void showNextActivity() {
+        Intent intent = new Intent(LoginActivity.this, DeviceListActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
 
     private void initViewModel() {
         mViewModel = ViewModelProviders.of(this, mViewModelFactory).get(LoginViewModel.class);
         mViewModel.isProcessing().observe(this, this::handleProcessing);
-        mViewModel.getError().observe(this, this::handleError);
-
         mViewModel.isAuthenticated().observe(this, this::processAuthenticated);
     }
 
@@ -116,30 +170,14 @@ public class LoginActivity extends AppCompatActivity implements Injectable {
         // TODO:
     }
 
-    private void handleError(@NonNull ViewModelError error) {
-        if (error.getType().equals(LoginViewModel.Error.AUTHENTICATE)) {
-            Snackbar.make(btnActivate, R.string.login_error_authenticating, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.login_snackbar_action_try_again, view -> signIn()).show();
-        }
-    }
 
     private void processAuthenticated(@NonNull Boolean isAuthenticated) {
         if (isAuthenticated) {
-            startActivity(new Intent(this, DeviceListActivity.class));
+            Intent intent = new Intent(LoginActivity.this, DeviceListActivity.class);
+            intent.putExtra(EXTRA_ACCESS_TOKEN, mViewModel.getCredentials().getAccessToken());
+            intent.putExtra(EXTRA_ID_TOKEN, mViewModel.getCredentials().getIdToken());
+            startActivity(intent);
             finish();
         }
-    }
-
-    private void signIn() {
-        mViewModel.authenticate(etUserName.getText().toString(),
-                etPassword.getText().toString());
-    }
-
-    private boolean validateUsername(String username) {
-        return !username.isEmpty();
-    }
-
-    private boolean validatePassword(String password) {
-        return !password.isEmpty();
     }
 }

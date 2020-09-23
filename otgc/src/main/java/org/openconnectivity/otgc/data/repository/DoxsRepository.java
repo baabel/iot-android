@@ -71,32 +71,8 @@ public class DoxsRepository {
             };
 
             int ret = -1;
-            if (oxm == OcfOxmType.OC_OXMTYPE_JW) {
-                ret = OCObt.performJustWorksOtm(uuid, handler);
-            } else if (oxm == OcfOxmType.OC_OXMTYPE_RDP) {
-                ret = OCObt.requestRandomPin(uuid, (OCUuid ocUuid, int status) -> {
-                    if (status >= 0) {
-                        String id = OCUuidUtil.uuidToString(ocUuid);
-                        Timber.d("Successfully request Random PIN " + id);
-                        String pin = randomPinHandler.handler(id);
-                        if (OCObt.performRandomPinOtm(uuid, pin, handler) != -1){
-                            emitter.onComplete();
-                        } else {
-                            String error = "ERROR send random PIN on device " + OCUuidUtil.uuidToString(ocUuid);
-                            Timber.e(error);
-                            emitter.onError(new Exception(error));
-                        }
-                    } else {
-                        String error = "ERROR requesting random PIN on device " + OCUuidUtil.uuidToString(ocUuid);
-                        Timber.e(error);
-                        emitter.onError(new Exception(error));
-                    }
-                });
-			} else if (oxm == OcfOxmType.OC_OXMTYPE_MFG_CERT) {
-                ret = OCObt.performCertOtm(uuid, handler);
-            }
-
-            if (ret >= 0) {
+            ret = OCObt.performCertOtm(uuid, handler);
+           if (ret >= 0) {
                 Timber.d("Successfully issued request to perform ownership transfer");
             } else {
                 String error = "ERROR issuing request to perform ownership transfer";
@@ -159,13 +135,6 @@ public class DoxsRepository {
         });
     }
 
-    public void setDisplayPinListener(OCRandomPinHandler displayPinListener) {
-        OCMain.setRandomPinHandler(displayPinListener);
-    }
-
-    public void setRandomPinCallbackListener(OCSetRandomPinHandler randomPinCallbackListener) {
-        this.randomPinHandler = randomPinCallbackListener;
-    }
 
     public Single<OcDoxm> get(String endpoint, String deviceId) {
         return Single.create(emitter -> {

@@ -29,6 +29,7 @@ android {
         applicationId "org.openconnectivity.otgc"
         minSdkVersion 21
         targetSdkVersion 28
+        manifestPlaceholders = [auth0Domain: "@string/com_auth0_domain", auth0Scheme: "demo"]
         versionCode 13
         versionName "2.13.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -67,6 +68,8 @@ dependencies {
     // local modules
     // IoTivity-lite
     implementation files('src/main/jniLibs/iotivity-lite.jar')
+    // Add the Auth0 Android SDK
+    implementation 'com.auth0.android:auth0:1.+'
 
     // AndroidX: Support Library
     implementation "androidx.appcompat:appcompat:$project.appCompatVersion"
@@ -84,6 +87,7 @@ dependencies {
     // AndroidX: Lifecycle
     implementation "androidx.lifecycle:lifecycle-runtime:$project.lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$project.lifecycleVersion"
+    implementation 'androidx.annotation:annotation:1.1.0'
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$project.lifecycleVersion"
 
     // AndroidX: Room

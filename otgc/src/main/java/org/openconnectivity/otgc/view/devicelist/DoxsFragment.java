@@ -330,54 +330,7 @@ public class DoxsFragment extends Fragment implements DoxsViewModel.SelectOxMLis
 
     @Override
     public OcfOxmType onGetOxM(List<OcfOxmType> supportedOxm) {
-        selectedOxm = null;
-        List<CharSequence> options = new ArrayList<>();
-        if (supportedOxm.contains(OcfOxmType.OC_OXMTYPE_JW)) {
-            options.add(getString(R.string.devices_oxm_just_works));
-        }
-        if (supportedOxm.contains(OcfOxmType.OC_OXMTYPE_RDP)) {
-            options.add(getString(R.string.devices_oxm_random_pin));
-        }
-        if (supportedOxm.contains(OcfOxmType.OC_OXMTYPE_MFG_CERT)) {
-            options.add(getString(R.string.devices_oxm_man_cert));
-        }
-
-        final Object lock = new Object();
-        getActivity().runOnUiThread(() -> {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-            alertDialog.setTitle(R.string.devices_select_oxm_title);
-            alertDialog.setOnCancelListener((dialog) -> {
-                dialog.dismiss();
-                try {
-                    synchronized (lock) {
-                        lock.notifyAll();
-                    }
-                } catch (Exception e) {
-                    Timber.e(e);
-                }
-            });
-            alertDialog.setItems(options.toArray(new CharSequence[0]), (dialog, which) -> {
-                dialog.dismiss();
-                try {
-                    synchronized (lock) {
-                        selectedOxm = supportedOxm.get(which);
-                        lock.notifyAll();
-                    }
-                } catch (Exception e) {
-                    Timber.e(e);
-                }
-            }).show();
-        });
-        synchronized (lock) {
-            try {
-                lock.wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                Timber.e(e);
-            }
-        }
-
-        return selectedOxm;
+        return OcfOxmType.OC_OXMTYPE_MFG_CERT;
     }
 
     private void handleProcessing(Boolean isProcessing) {

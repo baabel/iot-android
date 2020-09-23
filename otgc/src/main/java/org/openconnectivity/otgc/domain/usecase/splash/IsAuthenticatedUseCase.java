@@ -22,22 +22,32 @@
 
 package org.openconnectivity.otgc.domain.usecase.splash;
 
-import org.openconnectivity.otgc.data.repository.UserRepository;
+import android.content.Context;
+
+import com.auth0.android.Auth0;
+import com.auth0.android.authentication.AuthenticationAPIClient;
+import com.auth0.android.authentication.storage.SecureCredentialsManager;
+import com.auth0.android.authentication.storage.SharedPreferencesStorage;
 
 import javax.inject.Inject;
 
 import io.reactivex.Single;
 
 public class IsAuthenticatedUseCase {
-    private final UserRepository mUserRepository;
+
+    private Context mContext;
 
     @Inject
-    IsAuthenticatedUseCase(UserRepository userRepository) {
-        this.mUserRepository = userRepository;
+    IsAuthenticatedUseCase(Context context) {
+        this.mContext = context;
     }
 
     public Single<Boolean> execute() {
-        return mUserRepository.getUser()
-                .map(user -> user != null);
+        return Single.create(emitter -> {
+            Auth0 auth0 = new Auth0(this.mContext);
+            auth0.setOIDCConformant(true);
+            SecureCredentialsManager credentialsManager = new SecureCredentialsManager(mContext, new AuthenticationAPIClient(auth0), new SharedPreferencesStorage(this.mContext));
+            emitter.onSuccess(credentialsManager.hasValidCredentials());
+        });
     }
 }

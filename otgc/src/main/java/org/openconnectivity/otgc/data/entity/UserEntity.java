@@ -35,35 +35,67 @@ public class UserEntity {
 
     @NonNull
     @PrimaryKey
-    @ColumnInfo(name = "userid")
+    @ColumnInfo(name = "id")
     private String mId;
 
-    @ColumnInfo(name = "username")
-    private String mUserName;
+    @ColumnInfo(name = "userId")
+    private String mUserId;
 
-    @ColumnInfo(name = "password")
-    private String mPassword;
+    @ColumnInfo(name = "firstName")
+    private String mFirstName;
+
+    @ColumnInfo(name = "lastName")
+    private String mLastName;
+
+    @ColumnInfo(name = "idToken")
+    private String mIdToken;
+
+    @ColumnInfo(name = "accesToken")
+    private String mAccessToken;
+
+    @ColumnInfo(name = "refreshToken")
+    private String mRefreshToken;
 
     @Ignore
-    public UserEntity(String userName, String password) {
-        this(UUID.randomUUID().toString(), userName, password);
+    public UserEntity(String userId, String firstName, String lastName, String idToken, String accessToken, String refreshToken) {
+        this(UUID.randomUUID().toString(), userId, firstName, lastName, idToken, accessToken, refreshToken);
     }
 
-    public UserEntity(@NonNull String id, String userName, String password) {
+    public UserEntity(@NonNull String id, String userId, String firstName, String lastName, String idToken, String accessToken, String refreshToken) {
         this.mId = id;
-        this.mUserName = userName;
-        this.mPassword = password;
+        this.mUserId = userId;
+        this.mFirstName = firstName;
+        this.mLastName = lastName;
+        this.mIdToken = idToken;
+        this.mAccessToken = accessToken;
+        this.mRefreshToken = refreshToken;
     }
 
     public String getId() {
         return mId;
     }
 
-    public String getUserName() {
-        return mUserName;
+    public String getUserId() {
+        return mUserId;
     }
 
-    public String getPassword() {
-        return mPassword;
+    public String getFirstName() {
+        return mFirstName;
+    }
+
+    public String getLastName() {
+        return mLastName;
+    }
+
+    public String getIdToken() {
+        return mIdToken;
+    }
+
+    public String getAccessToken() {
+        return mAccessToken;
+    }
+
+    public String getRefreshToken() {
+        return mRefreshToken;
     }
 }

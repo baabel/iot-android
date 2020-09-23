@@ -38,6 +38,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public class SplashViewModel extends ViewModel {
 
@@ -61,7 +62,6 @@ public class SplashViewModel extends ViewModel {
             SchedulersFacade schedulersFacade) {
         this.mIsAuthenticatedUseCase = isAuthenticatedUseCase;
         this.mGrantPermissionsUseCase = grantPermissionsUseCase;
-
         this.mSchedulersFacade = schedulersFacade;
     }
 
@@ -87,8 +87,7 @@ public class SplashViewModel extends ViewModel {
     }
 
     public void checkIfIsAuthenticated() {
-        disposables.add(mIsAuthenticatedUseCase.execute()
-                .subscribeOn(mSchedulersFacade.io())
+        Disposable res = mIsAuthenticatedUseCase.execute()
                 .observeOn(mSchedulersFacade.ui())
                 .subscribe(
                         mAuthenticated::setValue,
@@ -104,7 +103,8 @@ public class SplashViewModel extends ViewModel {
                                 );
                             }
                         }
-                ));
+                );
+        disposables.add(res);
     }
 
     public void checkIfPermissionsAreGranted() {

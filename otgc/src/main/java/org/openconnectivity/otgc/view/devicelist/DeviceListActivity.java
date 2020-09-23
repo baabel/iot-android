@@ -22,8 +22,12 @@
 package org.openconnectivity.otgc.view.devicelist;
 
 import android.app.AlertDialog;
+
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -37,6 +41,14 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.auth0.android.Auth0;
+import com.auth0.android.Auth0Exception;
+import com.auth0.android.authentication.AuthenticationException;
+import com.auth0.android.provider.AuthCallback;
+import com.auth0.android.provider.VoidCallback;
+import com.auth0.android.provider.WebAuthProvider;
+import com.auth0.android.result.Credentials;
+
 import org.iotivity.OCRandomPinHandler;
 import org.openconnectivity.otgc.utils.constant.OtgcMode;
 import org.openconnectivity.otgc.utils.handler.DisplayNotValidCertificateHandler;
@@ -47,6 +59,7 @@ import org.openconnectivity.otgc.utils.viewmodel.Response;
 import org.openconnectivity.otgc.utils.viewmodel.Status;
 import org.openconnectivity.otgc.utils.viewmodel.ViewModelError;
 import org.openconnectivity.otgc.view.cloud.CloudActivity;
+import org.openconnectivity.otgc.view.splash.SplashActivity;
 import org.openconnectivity.otgc.view.trustanchor.TrustAnchorActivity;
 import org.openconnectivity.otgc.viewmodel.DeviceListViewModel;
 import org.openconnectivity.otgc.viewmodel.SharedViewModel;
@@ -84,54 +97,7 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
     // TODO: Refactor to avoid AlertDialog object
     private AlertDialog mConnectToWifiDialog = null;
 
-    String verifyPin = "";
-
-    OCSetRandomPinHandler randomPinCallbackListener = (String uuid) -> {
-        Timber.d("Inside randomPinListener");
-        final Object lock = new Object();
-        runOnUiThread(() -> {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(new ContextThemeWrapper(DeviceListActivity.this, R.style.AppTheme));
-            alertDialog.setTitle(DeviceListActivity.this.getString(R.string.devices_dialog_insert_randompin_title));
-            alertDialog.setMessage(uuid + ": ");
-            final EditText input = new EditText(DeviceListActivity.this);
-            alertDialog.setView(input);
-            alertDialog.setCancelable(false);
-            alertDialog.setPositiveButton(DeviceListActivity.this.getString(R.string.devices_dialog_insert_randompin_yes_option), (dialog, which) -> {
-                dialog.dismiss();
-                try {
-                    synchronized (lock) {
-                        verifyPin = input.getText().toString();
-                        lock.notifyAll();
-                    }
-                } catch (Exception e) {
-                    Timber.e(e);
-                }
-            }).show();
-        });
-        synchronized (lock) {
-            try {
-                lock.wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                Timber.e(e);
-            }
-        }
-        Timber.d("Verify after submit = %s", verifyPin);
-        return verifyPin;
-    };
-
-    OCRandomPinHandler displayPinListener = pin -> {
-        Timber.d("Inside displayPinListener");
-        runOnUiThread(() -> {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(new ContextThemeWrapper(DeviceListActivity.this, R.style.AppTheme));
-            alertDialog.setTitle(DeviceListActivity.this.getString(R.string.devices_dialog_show_randompin_title));
-            alertDialog.setMessage(pin);
-            alertDialog.setCancelable(false);
-            alertDialog.setPositiveButton(
-                    DeviceListActivity.this.getString(R.string.devices_dialog_show_randompin_yes_option),
-                    (dialog, which) -> dialog.dismiss()).show();
-        });
-    };
+    private Auth0 auth0;
 
     DisplayNotValidCertificateHandler displayNotValidCertificateHandler = content -> {
         runOnUiThread(() -> {
@@ -198,9 +164,6 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
                     showConfirmSetMode(OtgcMode.CLIENT, true);
                 }
                 break;
-            case R.id.menu_item_obt_mode:
-                showConfirmSetMode(OtgcMode.OBT, false);
-                break;
             case R.id.menu_item_client_mode:
                 showConfirmSetMode(OtgcMode.CLIENT, false);
                 break;
@@ -251,16 +214,8 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
         mViewModel = ViewModelProviders.of(this, mViewModelFactory).get(DeviceListViewModel.class);
         mViewModel.getError().observe(this, this::handleError);
 
-        mViewModel.getInit().observe(this, success -> {
-            if (success != null && success) {
-                mViewModel.setRandomPinListener(randomPinCallbackListener);
-                mViewModel.setDisplayPinListener(displayPinListener);
-                retrieveId();
-            }
-        });
         mViewModel.getMode().observe(this, this::processModeResponse);
         mViewModel.getClientModeResponse().observe(this, this::processClientModeResponse);
-        mViewModel.getObtModeResponse().observe(this, this::processObtModeResponse);
         mViewModel.getLogoutResponse().observe(this, this::processLogoutResponse);
         mViewModel.getConnectedResponse().observe(this, this::processConnectedResponse);
         mViewModel.getDeviceId().observe(this, mToolbar::setSubtitle);
@@ -311,22 +266,6 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
         }
     }
 
-    private void processObtModeResponse(Response<Void> response) {
-        switch (response.status) {
-            case LOADING:
-                mProgressBar.setVisibility(View.VISIBLE);
-                break;
-            case SUCCESS:
-                mProgressBar.setVisibility(View.GONE);
-                retrieveId();
-                onScanPressed();
-                break;
-            default:
-                mProgressBar.setVisibility(View.GONE);
-                Toast.makeText(this, R.string.devices_error_obt_mode_failed, Toast.LENGTH_SHORT).show();
-                break;
-        }
-    }
 
     private void processing(boolean isProcessing) {
         mProgressBar.setVisibility(isProcessing ? View.VISIBLE : View.GONE);
@@ -353,6 +292,7 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
 
     private void onLogoutPressed() {
         Timber.d("Deactivate option selected...");
+
         mViewModel.logout();
     }
 
@@ -410,5 +350,60 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
 
         });
         alertDialog.setNegativeButton(this.getString(R.string.devices_dialog_confirm_reset_device_no_option), (dialog, which) -> dialog.dismiss()).show();
+    }
+
+    private void login() {
+        WebAuthProvider.login(auth0)
+                .withScheme("demo")
+                .withAudience(String.format("https://%s/userinfo", getString(R.string.com_auth0_domain)))
+                .withScope("openid offline_access")
+                .start(this, new AuthCallback() {
+                    @Override
+                    public void onFailure(@NonNull final Dialog dialog) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(final AuthenticationException exception) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(DeviceListActivity.this, "Error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull final Credentials credentials) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //mViewModel.authenticate(credentials);
+                            }
+                        });
+                    }
+                });
+    }
+
+    private void logout() {
+        WebAuthProvider.logout(auth0)
+                .withScheme("demo")
+                .start(this, new VoidCallback() {
+                    @Override
+                    public void onSuccess(Void payload) {
+
+                    }
+
+                    @Override
+                    public void onFailure(Auth0Exception error) {
+                        //Log out canceled, keep the user logged in
+                        //showNextActivity();
+                    }
+                });
     }
 }

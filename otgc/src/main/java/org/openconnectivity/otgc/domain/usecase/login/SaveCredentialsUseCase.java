@@ -22,21 +22,40 @@
 
 package org.openconnectivity.otgc.domain.usecase.login;
 
-import org.openconnectivity.otgc.data.repository.UserRepository;
+import android.content.Context;
+import android.content.pm.PackageManager;
+
+import com.auth0.android.Auth0;
+import com.auth0.android.authentication.AuthenticationAPIClient;
+import com.auth0.android.authentication.storage.SecureCredentialsManager;
+import com.auth0.android.authentication.storage.SharedPreferencesStorage;
+import com.auth0.android.result.Credentials;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.Completable;
+import androidx.core.content.ContextCompat;
+import io.reactivex.Single;
+
 
 public class SaveCredentialsUseCase {
-    private final UserRepository mUserRepository;
+
+    private Context mContext;
 
     @Inject
-    public SaveCredentialsUseCase(UserRepository userRepository) {
-        this.mUserRepository = userRepository;
+    public SaveCredentialsUseCase(Context context) {
+        this.mContext = context;
     }
 
-    public Completable execute(String username, String password) {
-        return mUserRepository.putOrPostUser(username, password);
+    public Single<Boolean> execute(Credentials credentials) {
+        return Single.create(emitter -> {
+            Auth0 auth0 = new Auth0(this.mContext);
+            auth0.setOIDCConformant(true);
+            SecureCredentialsManager credentialsManager = new SecureCredentialsManager(mContext, new AuthenticationAPIClient(auth0), new SharedPreferencesStorage(this.mContext));
+            credentialsManager.saveCredentials(credentials);
+            emitter.onSuccess(true);
+        });
     }
 }

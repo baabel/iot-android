@@ -47,6 +47,9 @@ public class OcfResourceType {
     public static final String DOXM = OIC_RT_PREFIX + "doxm";
     public static final String PSTAT = OIC_RT_PREFIX + "pstat";
     public static final String ACL2 = OIC_RT_PREFIX + "acl2";
+    public static final String AEL = OIC_RT_PREFIX + "ael";
+    public static final String SDI = OIC_RT_PREFIX + "sdi";
+    public static final String COAPCLOUDCONF = OIC_RT_PREFIX + "coapcloudconf";
     public static final String CRED = OIC_RT_PREFIX + "cred";
     public static final String CRL = OIC_RT_PREFIX + "crl";
     public static final String CSR = OIC_RT_PREFIX + "csr";
@@ -155,7 +158,10 @@ public class OcfResourceType {
         NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.DOXM);
         NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.PSTAT);
         NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.ACL2);
+        NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.AEL);
         NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.CRED);
+        NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.SDI);
+        NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.COAPCLOUDCONF);
         NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.CRL);
         NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.CSR);
         NON_VERTICAL_RESOURCE_TYPES.add(OcfResourceType.ROLES);

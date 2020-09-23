@@ -21,21 +21,38 @@
  */
 package org.openconnectivity.otgc.domain.usecase.login;
 
-import org.openconnectivity.otgc.data.repository.UserRepository;
+import android.content.Context;
+
+import com.auth0.android.Auth0;
+import com.auth0.android.Auth0Exception;
+import com.auth0.android.authentication.AuthenticationAPIClient;
+import com.auth0.android.authentication.storage.SecureCredentialsManager;
+import com.auth0.android.authentication.storage.SharedPreferencesStorage;
+import com.auth0.android.provider.VoidCallback;
+import com.auth0.android.provider.WebAuthProvider;
+import com.auth0.android.result.Credentials;
 
 import javax.inject.Inject;
 
-import io.reactivex.Completable;
+import io.reactivex.Single;
+
 
 public class LogoutUseCase {
-    private final UserRepository mUserRepository;
 
-    @Inject
-    public LogoutUseCase(UserRepository userRepository) {
-        this.mUserRepository = userRepository;
+   Context mContext;
+
+   @Inject
+    public LogoutUseCase(Context context) {
+        this.mContext = context;
     }
 
-    public Completable execute() {
-        return mUserRepository.deleteUser();
+    public Single<Boolean> execute() {
+        return Single.create(emitter -> {
+            Auth0 auth0 = new Auth0(this.mContext);
+            auth0.setOIDCConformant(true);
+            SecureCredentialsManager credentialsManager = new SecureCredentialsManager(mContext, new AuthenticationAPIClient(auth0), new SharedPreferencesStorage(this.mContext));
+            credentialsManager.clearCredentials();
+            emitter.onSuccess(true);
+        });
     }
 }

@@ -52,7 +52,7 @@
         android:title="@string/devices_menu_item_settings" />
     <item
         android:id="@+id/buttonDeactivate"
-        android:visible="false"
-        app:showAsAction="never"
-        android:title="@string/devices_menu_item_logout" />
+        android:title="@string/devices_menu_item_logout"
+        android:visible="true"
+        app:showAsAction="never" />
 </menu>

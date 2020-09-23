@@ -54,6 +54,7 @@ public class PermissionRepository {
         this.mContext = ctx;
     }
 
+
     public Single<List<String>> getMissedPermissions() {
         return Single.create(emitter -> {
             List<String> missedPermissions = new ArrayList<>();

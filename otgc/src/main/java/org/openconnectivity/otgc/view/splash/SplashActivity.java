@@ -42,11 +42,21 @@ import android.os.Bundle;
 import androidx.appcompat.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.auth0.android.Auth0;
+import com.auth0.android.Auth0Exception;
+import com.auth0.android.authentication.AuthenticationException;
+import com.auth0.android.provider.AuthCallback;
+import com.auth0.android.provider.VoidCallback;
+import com.auth0.android.provider.WebAuthProvider;
+import com.auth0.android.result.Credentials;
 
 import org.openconnectivity.otgc.R;
 import org.openconnectivity.otgc.utils.viewmodel.ViewModelError;
 import org.openconnectivity.otgc.view.devicelist.DeviceListActivity;
 import org.openconnectivity.otgc.utils.di.Injectable;
+import org.openconnectivity.otgc.view.login.LoginActivity;
 import org.openconnectivity.otgc.viewmodel.SplashViewModel;
 
 import java.io.BufferedReader;
@@ -61,6 +71,11 @@ public class SplashActivity extends AppCompatActivity implements Injectable {
     private static final String PREFERENCE_EULA_ACCEPTED = "eula.accepted";
     private static final String PREFERENCES_EULA = "eula";
     private static final int PERMISSIONS_REQUEST_CODE = 1;
+    public static final String EXTRA_CLEAR_CREDENTIALS = "com.auth0.CLEAR_CREDENTIALS";
+    public static final String EXTRA_ACCESS_TOKEN = "com.auth0.ACCESS_TOKEN";
+    public static final String EXTRA_ID_TOKEN = "com.auth0.ID_TOKEN";
+
+
 
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
@@ -78,6 +93,8 @@ public class SplashActivity extends AppCompatActivity implements Injectable {
         initViewModel();
 
         showEulaDialog();
+
+       // mViewModel.checkIfIsAuthenticated();
         //mViewModel.checkIfPermissionsAreGranted();
     }
 
@@ -114,20 +131,17 @@ public class SplashActivity extends AppCompatActivity implements Injectable {
                 android.R.anim.fade_in, android.R.anim.fade_out
         ).toBundle();
 
-//        if (isAuthenticated) {
-//            startActivity(
-//                    new Intent(SplashActivity.this, DeviceListActivity.class),
-//                    bundle);
-//        } else {
-//            startActivity(
-//                    new Intent(SplashActivity.this, LoginActivity.class),
-//                    bundle);
-//        }
-        startActivity(
+   //     if (isAuthenticated) {
+            startActivity(
                     new Intent(SplashActivity.this, DeviceListActivity.class),
                     bundle);
-
-        finish();
+   //     } else {
+    //        login();
+     //   }
+        /*startActivity(
+                    new Intent(SplashActivity.this, DeviceListActivity.class),
+                    bundle);*/
+       finish();
     }
 
     private void handleMissedPermissions(@NonNull List<String> missedPermissions) {
@@ -224,4 +238,5 @@ public class SplashActivity extends AppCompatActivity implements Injectable {
         alertDialog.setCancelable(false);
         alertDialog.show(); // This should be called before looking up for elements
     }
+
 }

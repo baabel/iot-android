@@ -21,6 +21,9 @@
  */
 package org.openconnectivity.otgc.viewmodel;
 
+import com.auth0.android.result.Credentials;
+
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -32,13 +35,14 @@ import org.openconnectivity.otgc.utils.rx.SchedulersFacade;
 
 import javax.inject.Inject;
 
+import androidx.room.EmptyResultSetException;
 import io.reactivex.disposables.CompositeDisposable;
 
 public class LoginViewModel extends ViewModel {
 
     private final SaveCredentialsUseCase saveCredentialsUseCase;
 
-    private final SchedulersFacade schedulersFacade;
+    private final SchedulersFacade mSchedulersFacade;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -47,13 +51,14 @@ public class LoginViewModel extends ViewModel {
 
     private final MutableLiveData<Boolean> mAuthenticated = new MutableLiveData<>();
 
+    private Credentials mCredentials;
+
     @Inject
     LoginViewModel(
             SaveCredentialsUseCase saveCredentialsUseCase,
             SchedulersFacade schedulersFacade) {
         this.saveCredentialsUseCase = saveCredentialsUseCase;
-
-        this.schedulersFacade = schedulersFacade;
+        this.mSchedulersFacade = schedulersFacade;
     }
 
     @Override
@@ -73,16 +78,34 @@ public class LoginViewModel extends ViewModel {
         return mAuthenticated;
     }
 
-    public void authenticate(String username, String password) {
-        disposables.add(saveCredentialsUseCase.execute(username, password)
-                .subscribeOn(schedulersFacade.io())
-                .observeOn(schedulersFacade.ui())
-                .doOnSubscribe(__ -> mProcessing.setValue(true))
-                .doFinally(() -> mProcessing.setValue(false))
+    public void authenticate(@NonNull Credentials credentials) {
+        this.setCredentials(credentials);
+        disposables.add( saveCredentialsUseCase.execute(credentials)
+                .subscribeOn(mSchedulersFacade.io())
+                .observeOn(mSchedulersFacade.ui())
                 .subscribe(
-                        () -> mAuthenticated.setValue(true),
-                        throwable -> mError.setValue(new ViewModelError(Error.AUTHENTICATE, null))
+                        mAuthenticated::setValue,
+                        throwable -> {
+                            if (throwable instanceof EmptyResultSetException) {
+                                mAuthenticated.setValue(false);
+                            } else {
+                                mError.setValue(
+                                        new ViewModelError(
+                                                LoginViewModel.Error.AUTHENTICATE,
+                                                throwable.getLocalizedMessage()
+                                        )
+                                );
+                            }
+                        }
                 ));
+    }
+
+    private void setCredentials(Credentials credentials) {
+        this.mCredentials = credentials;
+    }
+
+    public Credentials getCredentials() {
+        return this.mCredentials;
     }
 
     public enum Error implements ViewModelErrorType {

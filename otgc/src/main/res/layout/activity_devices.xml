@@ -29,7 +29,6 @@
     android:background="@color/white1"
     android:keepScreenOn="true">
     <com.google.android.material.appbar.AppBarLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <FrameLayout
@@ -38,15 +37,20 @@
             android:gravity="top">
             <include
                 layout="@layout/progress_bar" />
+
             <include
-                layout="@layout/toolbar" />
+                layout="@layout/toolbar"
+                android:layout_height="match_parent" />
         </FrameLayout>
     </com.google.android.material.appbar.AppBarLayout>
-    <fragment android:name="org.openconnectivity.otgc.view.devicelist.DoxsFragment"
+
+    <fragment
         android:id="@+id/devices_fragment"
+        android:name="org.openconnectivity.otgc.view.devicelist.DoxsFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floating_button_device_scan"
         android:layout_width="wrap_content"
