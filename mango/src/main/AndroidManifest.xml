@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  *****************************************************************
+  ~
+  ~  Copyright 2018 DEKRA Testing and Certification, S.A.U. All Rights Reserved.
+  ~
+  ~  *****************************************************************
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~           http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  ~  *****************************************************************
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mango.home">
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name="com.mango.home.App"
+        android:label="@string/app_name"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name="com.mango.home.view.splash.SplashActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.mango.home.view.login.LoginActivity"
+            android:alwaysRetainTaskState="true"
+            android:configChanges="orientation|screenSize"
+            android:icon="@mipmap/ic_launcher"
+            android:launchMode="singleTop">
+        </activity>
+        <activity
+            android:name="com.mango.home.view.wlanscan.WlanScanActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/wlan_scan_title" />
+        <activity
+            android:name="com.mango.home.view.devicelist.DeviceListActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.mango.home.view.accesscontrol.AccessControlActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/access_control_title"
+            android:parentActivityName="com.mango.home.view.devicelist.DeviceListActivity"/>
+        <activity
+            android:name="com.mango.home.view.accesscontrol.AceActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/access_control_ace_title"
+            android:parentActivityName="com.mango.home.view.accesscontrol.AccessControlActivity" />
+        <activity
+            android:name="com.mango.home.view.credential.CredentialsActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/credentials_title"
+            android:parentActivityName="com.mango.home.view.devicelist.DeviceListActivity" />
+        <activity android:name="com.mango.home.view.credential.CredActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/credentials_cred_title"
+            android:parentActivityName="com.mango.home.view.credential.CredentialsActivity" />
+        <activity
+            android:name="com.mango.home.view.client.GenericClientActivity"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mango.home.view.devicelist.DeviceListActivity" />
+        <activity
+            android:name="com.mango.home.view.link.LinkedRolesActivity"
+            android:label="@string/linked_roles_title"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mango.home.view.devicelist.DeviceListActivity" />
+        <activity
+            android:name="com.mango.home.view.trustanchor.TrustAnchorActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/trust_anchor_title"
+            android:parentActivityName="com.mango.home.view.devicelist.DeviceListActivity" />
+        <activity
+            android:name="com.mango.home.view.cloud.CloudActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/cloud_title"
+            android:parentActivityName="com.mango.home.view.devicelist.DeviceListActivity" />
+        <activity
+            android:name="com.mango.home.view.trustanchor.CertificateActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/certificate_title"
+            android:parentActivityName="com.mango.home.view.trustanchor.TrustAnchorActivity" />
+        <activity
+            android:name="com.mango.home.view.logviewer.LogViewerActivity"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mango.home.view.devicelist.DeviceListActivity" />
+        <activity
+            android:name="com.mango.home.view.settings.SettingsActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/settings_title"
+            android:parentActivityName="com.mango.home.view.devicelist.DeviceListActivity" />
+        <activity android:name="com.mango.home.view.about.AboutActivity"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mango.home.view.settings.SettingsActivity" />
+    </application>
+
+</manifest>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
+        <!-- Customize your theme here. -->
+    <!--    <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item> -->
+
+
+        <!--    <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item> -->
+        <!--A color that passes accessibility guidelines for text/iconography when drawn on top of the primary color.
+        <item name="colorOnPrimary">@color/colorOnPrimary</item> -->
+
+        <!--The secondary branding color for the app, usually an accented complement to the primary branding color.
+        <item name="colorSecondary">@color/colorSecondary</item>-->
+        <!--A tonal variation of the secondary color.
+         <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item> -->
+        <!--A color that passes accessibility guidelines for text/iconography when drawn on top of the secondary color.
+        <item name="colorOnSecondary">@color/colorOnSecondary</item> -->
+
+        <!--The background color appears behind scrollable content.
+        <item name="android:background">@color/colorBackground</item> -->
+        <!--A color that passes accessibility guidelines for text/iconography when drawn on top of the background color.
+        <item name="colorOnBackground">@color/colorOnBackground</item> -->
+
+        <!--Surface colors affect surfaces of components, such as cards, sheets, and menus.
+        <item name="colorSurface">@color/colorSurface</item> -->
+        <!--A color that passes accessibility guidelines for text/iconography when drawn on top of the surface color.
+        <item name="colorOnSurface">@color/colorOnSurface</item> -->
+
+        <!--Error color indicates errors states, for components such as text fields
+        <item name="colorError">@color/colorError</item> -->
+        <!--A color that passes accessibility guidelines for text/iconography when drawn on top of the error color.
+        <item name="colorOnError">@color/colorOnError</item> -->
+
+       <!--  <item name="android:statusBarColor">@color/colorBackground</item> -->
+
+
+        <!-- custom font for the entire app -->
+        <item name="android:fontFamily">@font/century_gothic</item>
+        <!--<item name="fontFamily">@font/century_gothic</item> --> <!-- target android sdk versions < 26 and > 14 if theme other than AppCompat -->
+        <!--<item name="android:textColorSecondary">@color/white1</item>-->
+        <item name="android:alertDialogTheme">@style/AppTheme.Dialog</item>
+
+        <!-- It should be true otherwise action mode will not overlay toolbar -->
+        <item name="windowActionModeOverlay">true</item>
+
+        <!-- For Custom Action Mode Background Color/Drawable
+        <item name="actionModeBackground">@color/colorAccent</item> -->
+    </style>
+
+    <style name="SplashTheme" parent="AppTheme">
+        <!-- android:gravity property of layer-list is not properly managed in APIs 21 and 22 due to an Android bug,
+        so a different approach to create the splash has been necessary in those APIs until it is fixed -->
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
+
+    <style name="AppTheme.Dialog" parent="Theme.MaterialComponents.Dialog">
+      <!--  <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorPrimary</item> -->
+    </style>
+</resources>
