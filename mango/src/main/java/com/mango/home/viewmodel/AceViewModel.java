@@ -32,11 +32,9 @@ import com.mango.home.domain.usecase.RetrieveVerticalResourcesUseCase;
 import com.mango.home.utils.viewmodel.ViewModelError;
 import com.mango.home.utils.viewmodel.ViewModelErrorType;
 import com.mango.home.utils.rx.SchedulersFacade;
-
+import com.mango.home.domain.model.devicelist.DeviceType;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import io.reactivex.disposables.CompositeDisposable;
 
 public class AceViewModel extends ViewModel {
@@ -87,17 +85,19 @@ public class AceViewModel extends ViewModel {
     }
 
     public void retrieveResources(Device device) {
-        mDisposables.add(mRetrieveVerticalResourcesUseCase.execute(device)
-                .subscribeOn(mSchedulersFacade.io())
-                .observeOn(mSchedulersFacade.ui())
-                .doOnSubscribe(__ -> mProcessing.setValue(true))
-                .doFinally(() -> mProcessing.setValue(false))
-                .subscribe(
-                        mResources::setValue,
-                        throwable -> {
-                            mError.setValue(new ViewModelError(Error.RETRIEVE_RESOURCES, null));
-                        }
-                ));
+        if (device.getDeviceType() != DeviceType.CLOUD) {
+            mDisposables.add(mRetrieveVerticalResourcesUseCase.execute(device)
+                    .subscribeOn(mSchedulersFacade.io())
+                    .observeOn(mSchedulersFacade.ui())
+                    .doOnSubscribe(__ -> mProcessing.setValue(true))
+                    .doFinally(() -> mProcessing.setValue(false))
+                    .subscribe(
+                            mResources::setValue,
+                            throwable -> {
+                                mError.setValue(new ViewModelError(Error.RETRIEVE_RESOURCES, null));
+                            }
+                    ));
+        }
     }
 
     public void createAce(Device device, String subjectId, int permission, List<String> resources) {

@@ -35,10 +35,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
 
 import com.mango.home.domain.model.client.DynamicUiElement;
 import com.mango.home.domain.model.client.SerializableResource;
@@ -49,6 +49,9 @@ import com.mango.home.utils.viewmodel.ViewModelError;
 import com.mango.home.viewmodel.GenericClientViewModel;
 
 import com.mango.home.R;
+
+import com.mango.home.domain.model.devicelist.DeviceType;
+
 
 import java.util.List;
 
@@ -93,7 +96,11 @@ public class GenericClientActivity extends AppCompatActivity implements HasSuppo
         mViewModel.loadDeviceName(mDevice.getDeviceId());
         mViewModel.loadDeviceInfo(mDevice);
         mViewModel.loadPlatformInfo(mDevice);
-        mViewModel.introspect(mDevice);
+        if (mDevice.getDeviceType() != DeviceType.CLOUD) {
+            mViewModel.introspect(mDevice);
+        } else {
+            mViewModel.findResources(mDevice);
+        }
     }
 
     @Override

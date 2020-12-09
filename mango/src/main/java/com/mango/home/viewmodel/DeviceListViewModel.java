@@ -47,6 +47,13 @@ import com.mango.home.utils.viewmodel.ViewModelError;
 import com.mango.home.domain.usecase.GetDeviceIdUseCase;
 import com.mango.home.utils.rx.SchedulersFacade;
 import com.mango.home.utils.viewmodel.ViewModelErrorType;
+import com.mango.home.domain.usecase.cloud.CloudDeregisterUseCase;
+import com.mango.home.domain.usecase.cloud.CloudLoginUseCase;
+import com.mango.home.domain.usecase.cloud.CloudLogoutUseCase;
+import com.mango.home.domain.usecase.cloud.CloudRefreshTokenUseCase;
+import com.mango.home.domain.usecase.cloud.CloudRegisterUseCase;
+import com.mango.home.domain.usecase.cloud.RetrieveStatusUseCase;
+import com.mango.home.domain.usecase.cloud.RetrieveTokenExpiryUseCase;
 
 import javax.inject.Inject;
 
@@ -78,6 +85,13 @@ public class DeviceListViewModel extends ViewModel {
     private final ResetObtModeUseCase resetObtModeUseCase;
     private final CheckConnectionUseCase mCheckConnectionUseCase;
     private final GetDeviceIdUseCase mGetDeviceIdUseCase;
+    private final RetrieveStatusUseCase retrieveStatusUseCase;
+    private final CloudRegisterUseCase cloudRegisterUseCase;
+    private final CloudDeregisterUseCase cloudDeregisterUseCase;
+    private final CloudLoginUseCase cloudLoginUseCase;
+    private final CloudLogoutUseCase cloudLogoutUseCase;
+    private final CloudRefreshTokenUseCase refreshTokenUseCase;
+    private final RetrieveTokenExpiryUseCase retrieveTokenExpiryUseCase;
 
     private final MutableLiveData<Boolean> mInit = new MutableLiveData<>();
     private final MutableLiveData<String> mMode = new MutableLiveData<>();
@@ -86,6 +100,7 @@ public class DeviceListViewModel extends ViewModel {
     private final MutableLiveData<Response<Void>> logoutResponse = new MutableLiveData<>();
     private final MutableLiveData<Response<Boolean>> connectedResponse = new MutableLiveData<>();
     private final MutableLiveData<String> mDeviceId = new MutableLiveData<>();
+    private final MutableLiveData<Response<Integer>> statusResponse = new MutableLiveData<>();
 
     @Inject
     DeviceListViewModel(
@@ -99,6 +114,13 @@ public class DeviceListViewModel extends ViewModel {
             ResetObtModeUseCase resetObtModeUseCase,
             CheckConnectionUseCase checkConnectionUseCase,
             GetDeviceIdUseCase getDeviceIdUseCase,
+            RetrieveStatusUseCase retrieveStatusUseCase,
+            CloudRegisterUseCase cloudRegisterUseCase,
+            CloudDeregisterUseCase cloudDeregisterUseCase,
+            CloudLoginUseCase cloudLoginUseCase,
+            CloudLogoutUseCase cloudLogoutUseCase,
+            CloudRefreshTokenUseCase refreshTokenUseCase,
+            RetrieveTokenExpiryUseCase retrieveTokenExpiryUseCase,
             SchedulersFacade schedulersFacade,
             SaveCredentialsUseCase saveCredentialsUseCase) {
         this.mInitializeIotivityUseCase = initializeIotivityUseCase;
@@ -111,7 +133,13 @@ public class DeviceListViewModel extends ViewModel {
         this.resetObtModeUseCase = resetObtModeUseCase;
         this.mCheckConnectionUseCase = checkConnectionUseCase;
         this.mGetDeviceIdUseCase = getDeviceIdUseCase;
-
+        this.retrieveStatusUseCase = retrieveStatusUseCase;
+        this.cloudRegisterUseCase = cloudRegisterUseCase;
+        this.cloudDeregisterUseCase = cloudDeregisterUseCase;
+        this.cloudLoginUseCase = cloudLoginUseCase;
+        this.cloudLogoutUseCase = cloudLogoutUseCase;
+        this.refreshTokenUseCase = refreshTokenUseCase;
+        this.retrieveTokenExpiryUseCase = retrieveTokenExpiryUseCase;
         this.mSchedulersFacade = schedulersFacade;
         this.saveCredentialsUseCase = saveCredentialsUseCase;
     }
@@ -153,6 +181,10 @@ public class DeviceListViewModel extends ViewModel {
         return mDeviceId;
     }
 
+    public LiveData<Response<Integer>> getStatusResponse() {
+        return statusResponse;
+    }
+
     public void initializeIotivityStack(Context context, DisplayNotValidCertificateHandler displayNotValidCertificateHandler) {
         disposables.add(mInitializeIotivityUseCase.execute(context, displayNotValidCertificateHandler)
                 .subscribeOn(mSchedulersFacade.io())
@@ -172,6 +204,76 @@ public class DeviceListViewModel extends ViewModel {
                             // mError.setValue()
                             mInit.setValue(false);
                         }
+                ));
+    }
+
+    public void retrieveCloudStatus() {
+        disposables.add(retrieveStatusUseCase.execute()
+                .subscribeOn(mSchedulersFacade.io())
+                .observeOn(mSchedulersFacade.ui())
+                .subscribe(
+                        status -> statusResponse.setValue(Response.success(status)),
+                        throwable -> statusResponse.setValue(Response.error(throwable))
+                ));
+    }
+
+    public void cloudRegister() {
+        disposables.add(cloudRegisterUseCase.execute()
+                .subscribeOn(mSchedulersFacade.io())
+                .observeOn(mSchedulersFacade.ui())
+                .subscribe(
+                        status -> statusResponse.setValue(Response.success(status)),
+                        throwable -> statusResponse.setValue(Response.error(throwable))
+                ));
+    }
+
+    public void cloudDeregister() {
+        disposables.add(cloudDeregisterUseCase.execute()
+                .subscribeOn(mSchedulersFacade.io())
+                .observeOn(mSchedulersFacade.ui())
+                .subscribe(
+                        status -> statusResponse.setValue(Response.success(status)),
+                        throwable -> statusResponse.setValue(Response.error(throwable))
+                ));
+    }
+
+    public void cloudLogin() {
+        disposables.add(cloudLoginUseCase.execute()
+                .subscribeOn(mSchedulersFacade.io())
+                .observeOn(mSchedulersFacade.ui())
+                .subscribe(
+                        status -> statusResponse.setValue(Response.success(status)),
+                        throwable -> statusResponse.setValue(Response.error(throwable))
+                ));
+    }
+
+    public void cloudLogout() {
+        disposables.add(cloudLogoutUseCase.execute()
+                .subscribeOn(mSchedulersFacade.io())
+                .observeOn(mSchedulersFacade.ui())
+                .subscribe(
+                        status -> statusResponse.setValue(Response.success(status)),
+                        throwable -> statusResponse.setValue(Response.error(throwable))
+                ));
+    }
+
+    public void retrieveTokenExpiry() {
+        disposables.add(retrieveTokenExpiryUseCase.execute()
+                .subscribeOn(mSchedulersFacade.io())
+                .observeOn(mSchedulersFacade.ui())
+                .subscribe(
+                        () -> {},
+                        throwable -> {}
+                ));
+    }
+
+    public void refreshToken() {
+        disposables.add(refreshTokenUseCase.execute()
+                .subscribeOn(mSchedulersFacade.io())
+                .observeOn(mSchedulersFacade.ui())
+                .subscribe(
+                        status -> statusResponse.setValue(Response.success(status)),
+                        throwable -> statusResponse.setValue(Response.error(throwable))
                 ));
     }
 

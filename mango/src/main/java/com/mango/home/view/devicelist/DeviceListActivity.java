@@ -32,10 +32,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -59,11 +59,12 @@ import com.mango.home.viewmodel.DeviceListViewModel;
 import com.mango.home.viewmodel.SharedViewModel;
 
 import com.mango.home.view.cloud.CloudActivity;
-import com.mango.home.view.login.LoginActivity;
 import com.mango.home.R;
 import com.mango.home.view.settings.SettingsActivity;
 import com.mango.home.view.logviewer.LogViewerActivity;
 import com.mango.home.view.wlanscan.WlanScanActivity;
+
+import org.iotivity.OCCloudStatusMask;
 
 import javax.inject.Inject;
 
@@ -84,6 +85,12 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
 
     @BindView(R.id.progress_bar) ProgressBar mProgressBar;
    // @BindView(R.id.toolbar) Toolbar mToolbar;
+
+    MenuItem cloudRegister;
+    MenuItem cloudDeregister;
+    MenuItem cloudLogin;
+    MenuItem cloudLogout;
+    MenuItem cloudRefreshToken;
 
     private MenuItem obtMenuItem;
     private MenuItem clientMenuItem;
@@ -143,6 +150,14 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
                 clientMenuItem = item;
             } else if (title.contains(OtgcMode.OBT.toLowerCase())) {
                 obtMenuItem = item;
+            } else if (title.equals("cloud")) {
+                SubMenu submenu = item.getSubMenu();
+
+                cloudRegister = submenu.findItem(R.id.menu_item_cloud_register);
+                cloudDeregister = submenu.findItem(R.id.menu_item_cloud_deregister);
+                cloudLogin = submenu.findItem(R.id.menu_item_cloud_login);
+                cloudLogout = submenu.findItem(R.id.menu_item_cloud_logout);
+                cloudRefreshToken = submenu.findItem(R.id.menu_item_cloud_refresh_token);
             }
         }
 
@@ -167,8 +182,26 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
             case R.id.menu_item_trust_anchor:
                 onTrustAnchorManagement();
                 break;
+            case R.id.menu_item_cloud:
+                onRetrieveCloudStatus();
+                break;
             case R.id.menu_item_cloud_configuration:
                 onCloudConfiguration();
+                break;
+            case R.id.menu_item_cloud_register:
+                onCloudRegister();
+                break;
+            case R.id.menu_item_cloud_deregister:
+                onCloudDeregister();
+                break;
+            case R.id.menu_item_cloud_login:
+                onCloudLogin();
+                break;
+            case R.id.menu_item_cloud_logout:
+                onCloudLogout();
+                break;
+            case R.id.menu_item_cloud_refresh_token:
+                onRefreshToken();
                 break;
             case R.id.menu_item_log:
                 onLogPressed();
@@ -204,7 +237,7 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
     }
 
     private void initViews() {
-  //      setSupportActionBar(mToolbar);
+  //        setSupportActionBar(mToolbar);
     }
 
     private void initViewModel() {
@@ -216,6 +249,7 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
         mViewModel.getLogoutResponse().observe(this, this::processLogoutResponse);
         mViewModel.getConnectedResponse().observe(this, this::processConnectedResponse);
        // mViewModel.getDeviceId().observe(this, mToolbar::setSubtitle);
+        mViewModel.getStatusResponse().observe(this, this::processStatusResponse);
 
         SharedViewModel sharedViewModel = ViewModelProviders.of(this, mViewModelFactory).get(SharedViewModel.class);
         sharedViewModel.getLoading().observe(this, this::processing);
@@ -281,6 +315,82 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
                 && response.data != null && !response.data) {
             goToWlanConnectSSID();
         }
+    }
+
+    private void processStatusResponse(Response<Integer> response) {
+        switch (response.status) {
+            case LOADING:
+                mProgressBar.setVisibility(View.VISIBLE);
+                break;
+            case SUCCESS:
+                mProgressBar.setVisibility(View.GONE);
+                int status = response.data;
+                if (status == OCCloudStatusMask.OC_CLOUD_INITIALIZED) {
+                    cloudRegister.setVisible(true);
+                    cloudDeregister.setVisible(false);
+                    cloudLogin.setVisible(false);
+                    cloudLogout.setVisible(false);
+                    cloudRefreshToken.setVisible(false);
+                }
+                if ((status & OCCloudStatusMask.OC_CLOUD_REGISTERED) == OCCloudStatusMask.OC_CLOUD_REGISTERED) {
+                    cloudRegister.setVisible(false);
+                    cloudDeregister.setVisible(true);
+                    cloudLogin.setVisible(true);
+                    cloudLogout.setVisible(false);
+                    cloudRefreshToken.setVisible(true);
+                }
+                if ((status & OCCloudStatusMask.OC_CLOUD_LOGGED_IN) == OCCloudStatusMask.OC_CLOUD_LOGGED_IN) {
+                    cloudLogin.setVisible(false);
+                    cloudLogout.setVisible(true);
+                }
+                if ((status & OCCloudStatusMask.OC_CLOUD_TOKEN_EXPIRY) == OCCloudStatusMask.OC_CLOUD_TOKEN_EXPIRY) {
+                    mViewModel.retrieveTokenExpiry();
+                }
+                if ((status & OCCloudStatusMask.OC_CLOUD_REFRESHED_TOKEN) == OCCloudStatusMask.OC_CLOUD_REFRESHED_TOKEN) {
+                    mViewModel.refreshToken();
+                }
+                if ((status & OCCloudStatusMask.OC_CLOUD_LOGGED_OUT) == OCCloudStatusMask.OC_CLOUD_LOGGED_OUT) {
+                    cloudLogin.setVisible(true);
+                    cloudLogout.setVisible(false);
+                }
+                if ((status & OCCloudStatusMask.OC_CLOUD_DEREGISTERED) == OCCloudStatusMask.OC_CLOUD_DEREGISTERED) {
+                    cloudRegister.setVisible(true);
+                    cloudDeregister.setVisible(false);
+                    cloudLogin.setVisible(false);
+                    cloudLogout.setVisible(false);
+                    cloudRefreshToken.setVisible(false);
+                }
+
+                break;
+            default:
+                mProgressBar.setVisibility(View.GONE);
+                Toast.makeText(this, R.string.devices_error_cloud_status_failed, Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    private void onRetrieveCloudStatus() {
+        mViewModel.retrieveCloudStatus();
+    }
+
+    private void onCloudRegister() {
+        mViewModel.cloudRegister();
+    }
+
+    private void onCloudDeregister() {
+        mViewModel.cloudDeregister();
+    }
+
+    private void onCloudLogin() {
+        mViewModel.cloudLogin();
+    }
+
+    private void onCloudLogout() {
+        mViewModel.cloudLogout();
+    }
+
+    private void onRefreshToken() {
+        mViewModel.refreshToken();
     }
 
     private void onSettingsPressed() {

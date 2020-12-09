@@ -56,6 +56,8 @@ import org.iotivity.OCRepresentation;
 import org.iotivity.OCType;
 import org.iotivity.OCValue;
 import com.mango.home.R;
+import com.mango.home.domain.model.devicelist.DeviceType;
+
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -120,7 +122,9 @@ public class ResourceFragment extends Fragment implements Injectable {
         super.onDestroy();
 
         if (mResource.isObservable()) {
-            mViewModel.cancelObserveRequest(mResource);
+            if (mDevice.getDeviceType() != DeviceType.CLOUD) {
+                mViewModel.cancelObserveRequest(mResource);
+            }
         }
     }
 
@@ -150,7 +154,9 @@ public class ResourceFragment extends Fragment implements Injectable {
                 if (isChecked) {
                     mViewModel.observeRequest(mDevice, mResource);
                 } else {
-                    mViewModel.cancelObserveRequest(mResource);
+                    if (mDevice.getDeviceType() != DeviceType.CLOUD) {
+                        mViewModel.cancelObserveRequest(mResource);
+                    }
                 }
             });
         } else {
