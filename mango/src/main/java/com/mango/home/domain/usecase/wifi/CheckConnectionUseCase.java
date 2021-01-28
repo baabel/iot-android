@@ -46,7 +46,8 @@ public class CheckConnectionUseCase {
         return wlanRepository.isConnectedToWiFi()
                 .map(isConnected -> {
                     if (!isConnected) {
-                        throw new NetworkDisconnectedException();
+                        //throw new NetworkDisconnectedException();
+                        return false;
                     }
 
                     return true;

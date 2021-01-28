@@ -24,8 +24,12 @@ package com.mango.home.data.repository;
 
 import android.content.Context;
 
+import org.iotivity.oc.OcResource;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import io.reactivex.Completable;
 
 @Singleton
 public class EasySetupRepository {
@@ -37,7 +41,7 @@ public class EasySetupRepository {
         mContext = context;
     }
 
-    /*public Completable configureAndConnect(OcResource ocResource,
+   /* public Completable configureAndConnect(OcResource ocResource,
                                            String enrollerSsid,
                                            String enrollerPwd,
                                            int authType,
@@ -108,5 +112,5 @@ public class EasySetupRepository {
         deviceProp.setDevConfProp(language, country, "");
 
         return deviceProp;
-    }*/
+    } */
 }

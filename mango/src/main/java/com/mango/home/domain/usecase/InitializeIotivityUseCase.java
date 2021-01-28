@@ -145,6 +145,18 @@ public class InitializeIotivityUseCase {
             this.displayNotValidCertificateHandler.handler("EonTi root certificate is not valid");
         }
 
+        /* Cloud CA root cert */
+        inputStream = context.getAssets().open(OtgcConstant.CLOUDCA_CERTIFICATE);
+        caCert = ioRepository.getFileAsX509Certificate(inputStream).blockingGet();
+        if (date.after(caCert.getNotBefore()) && date.before(caCert.getNotAfter())) {
+            byte[] cloudRootcaCertificate = ioRepository.getBytesFromFile(OtgcConstant.CLOUDCA_CERTIFICATE).blockingGet();
+            if (OCPki.addTrustAnchor(device, cloudRootcaCertificate) == -1) {
+                throw new Exception("Add cloudca root certificate error");
+            }
+        } else {
+            this.displayNotValidCertificateHandler.handler("cloud ca root certificate is not valid");
+        }
+
         OCObt.shutdown();
     }
 }

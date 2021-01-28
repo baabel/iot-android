@@ -329,6 +329,14 @@ public class CloudRepository {
         });
     }
 
+    public Single<String> getSecureEndpoint() {
+        return Single.create(emitter -> {
+            OCCloudContext ctx = OCCloud.getContext(0);
+            emitter.onSuccess(ctx.getCloudEndpoint().toString());
+        });
+    }
+
+
     public Single<OCEndpoint> retrieveEndpoint() {
         return Single.create(emitter -> {
             OCCloudContext ctx = OCCloud.getContext(0);
@@ -349,7 +357,7 @@ public class CloudRepository {
                 }
             };
 
-            if (!OCMain.doGet(uri, endpoint, null, handler, OCQos.HIGH_QOS)) {
+            if (!OCMain.doGet(uri, endpoint, "oic.if.a", handler, OCQos.HIGH_QOS)) {
                 emitter.onError(new Exception("Get device info error"));
             }
         });
@@ -452,7 +460,7 @@ public class CloudRepository {
                 }
             };
 
-            if (!OCMain.doGet(uri, endpoint, null, handler, OCQos.LOW_QOS)) {
+            if (!OCMain.doGet(uri, endpoint, "if=oic.if.a", handler, OCQos.LOW_QOS)) {
                 emitter.onError(new Exception("Error in GET request"));
             }
         });
@@ -473,7 +481,7 @@ public class CloudRepository {
                 }
             };
 
-            if (OCMain.initPost(uri, endpoint, null, handler, OCQos.HIGH_QOS)) {
+            if (OCMain.initPost(uri, endpoint, "if=oic.if.a", handler, OCQos.HIGH_QOS)) {
                 CborEncoder root = OCRep.beginRootObject();
                 parseOCRepresentionToCbor(root, rep, valueArray);
                 OCRep.endRootObject();

@@ -74,7 +74,7 @@ public class ResourceRepository {
             // Add resource to map
             observeMap.put(resource.getUri(), ep);
 
-            if (!OCMain.doObserve(resource.getUri(), ep, null, handler, OCQos.HIGH_QOS)) {
+            if (!OCMain.doObserve(resource.getUri(), ep, "if=oic.if.a", handler, OCQos.HIGH_QOS)) {
                 emitter.onError(new Exception("Observe resource " + resource.getUri() + " error"));
             }
         });

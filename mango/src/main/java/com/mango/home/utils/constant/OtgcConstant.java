@@ -39,6 +39,7 @@ public class OtgcConstant {
     /* Kyrio certificate chain */
     public static String EONTI_ROOT_CERTIFICATE = "eonti-root-cert.pem";
     public static String KYRIO_ROOT_CERTIFICATE = "kyrio-root-cert.pem";
+    public static String CLOUDCA_CERTIFICATE = "cloudca.pem";
     public static String KYRIO_SUBCA_CERTIFICATE = "kyrio-subca-cert.pem";
     public static String KYRIO_EE_CERTIFICATE = "kyrio-ee-cert.pem";
     public static String KYRIO_EE_KEY = "kyrio-ee-key.pem";

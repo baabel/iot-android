@@ -150,7 +150,7 @@ public class ResourceViewModel extends ViewModel {
     }
 
     public void observeRequest(Device device, SerializableResource resource) {
-        if (device.getDeviceType() != DeviceType.CLOUD) {
+        if (device.getDeviceType() != DeviceType.UNOWNED) {
             disposables.add(mObserveResource.execute(device, resource)
                     .subscribeOn(mSchedulersFacade.io())
                     .observeOn(mSchedulersFacade.ui())

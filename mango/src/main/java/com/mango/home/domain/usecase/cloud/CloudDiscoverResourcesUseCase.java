@@ -5,6 +5,8 @@ import com.mango.home.domain.model.client.SerializableResource;
 import com.mango.home.domain.model.devicelist.Device;
 import com.mango.home.domain.model.resource.virtual.res.OcResource;
 
+import org.iotivity.OCResourcePropertiesMask;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +37,9 @@ public class CloudDiscoverResourcesUseCase {
                                         serializableResource.setUri(resource.getHref());
                                         serializableResource.setResourceTypes(resource.getResourceTypes());
                                         serializableResource.setResourceInterfaces(resource.getInterfaces());
-                                        serializableResource.setObservable(false);
-
+                                        //serializableResource.setObservable(false);
+                                        serializableResource.setObservable(
+                                                (resource.getPropertiesMask() & OCResourcePropertiesMask.OC_OBSERVABLE) > 0);
                                         serializableResources.add(serializableResource);
                                     }
 

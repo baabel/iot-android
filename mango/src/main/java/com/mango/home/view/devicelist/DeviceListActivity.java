@@ -129,7 +129,7 @@ public class DeviceListActivity extends AppCompatActivity implements HasSupportF
     protected void onResume() {
         super.onResume();
 
-        mViewModel.checkIfIsConnectedToWifi();
+      //  mViewModel.checkIfIsConnectedToWifi();
     }
 
     @Override

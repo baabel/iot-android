@@ -41,7 +41,7 @@
         <item name="android:fontFamily">@font/century_gothic</item>
         <!--<item name="fontFamily">@font/century_gothic</item> --> <!-- target android sdk versions < 26 and > 14 if theme other than AppCompat -->
         <!--<item name="android:textColorSecondary">@color/white1</item>-->
-        <item name="android:alertDialogTheme">@style/AppTheme.Dialog</item>
+       <!-- <item name="android:alertDialogTheme">@style/AppTheme.Dialog</item> -->
 
         <!-- It should be true otherwise action mode will not overlay toolbar -->
         <item name="windowActionModeOverlay">true</item>
@@ -59,7 +59,7 @@
     </style>
 
 
-    <style name="AppTheme.Dialog" parent="Theme.MaterialComponents.Dialog">
+    <style name="AppTheme.Dialog" parent="AppTheme">
       <!--  <item name="android:colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/colorPrimary</item> -->
     </style>

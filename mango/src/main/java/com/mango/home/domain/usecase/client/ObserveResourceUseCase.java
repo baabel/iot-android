@@ -22,31 +22,37 @@
 
 package com.mango.home.domain.usecase.client;
 
+import com.mango.home.data.repository.CloudRepository;
 import com.mango.home.data.repository.IotivityRepository;
 import com.mango.home.data.repository.ResourceRepository;
 import com.mango.home.domain.model.client.SerializableResource;
 import com.mango.home.domain.model.devicelist.Device;
+import com.mango.home.domain.model.devicelist.DeviceType;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public class ObserveResourceUseCase {
 
     private final IotivityRepository iotivityRepository;
     private final ResourceRepository resourceRepository;
+    private final CloudRepository cloudRepository;
 
     @Inject
     public ObserveResourceUseCase(IotivityRepository iotivityRepository,
-                                  ResourceRepository resourceRepository) {
+                                  ResourceRepository resourceRepository,
+                                  CloudRepository cloudRepository) {
         this.iotivityRepository = iotivityRepository;
         this.resourceRepository = resourceRepository;
+        this.cloudRepository = cloudRepository;
     }
 
     public Observable<SerializableResource> execute (Device device, SerializableResource resource) {
-        return iotivityRepository.getSecureEndpoint(device)
+        Single<String> secureEndpoint = device.getDeviceType() == DeviceType.CLOUD ? cloudRepository.getSecureEndpoint() : iotivityRepository.getSecureEndpoint(device);
+        return secureEndpoint
                 .flatMapObservable(endpoint -> resourceRepository.observeResource(endpoint, device.getDeviceId(), resource));
-
     }
 }
 
